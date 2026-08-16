@@ -1,20 +1,40 @@
 package main
-import(
+
+import (
 	"fmt"
 	"net/http"
-	"time"
 	"sync"
+	"time"
 )
-type Result struct{
+type Result struct {
 	URL string
 	StatusCode int
 	Err error
 }
-func main(){
+
+func ping(url string, results chan<- Result, wg *sync.WaitGroup) {
+	defer wg.Done()
+	client := http.Client{
+		Timeout: 10*time.Second,
+	}
+	resp, err := client.Get(url)
+	if err != nil {
+		results <- Result{URL: url, StatusCode: 0, Err: err}
+		return
+	}
+	defer resp.Body.Close()
+	results <- Result{
+		URL: url,
+		StatusCode: resp.StatusCode,
+		Err: nil,
+	}
+}
+ 
+func main() {
 	urls := []string{
-		"https://golang.org",
 		"https://google.com",
 		"https://github.com",
+		"https://golang.org",
 		"https://httpbin.org/status/404",
 		"https://httpbin.org/delay/1",
 	}
@@ -28,8 +48,8 @@ func main(){
 		wg.Wait()
 		close(results)
 	}()
-	fmt.Println("--- Pring Results ---")
-	for res := range results {
+	fmt.Println("--- Ping Results ---")
+	for res:= range results {
 		if res.Err != nil {
 			fmt.Printf("[ERROR] %-30s -> %v\n", res.URL, res.Err)
 		} else {
@@ -37,16 +57,4 @@ func main(){
 		}
 	}
 	fmt.Println("All target URLs processed.")
-}
-func ping(url string, results chan<- Result, wg *sync.WaitGroup) {
-	defer wg.Done()
-	client := http.Client{
-		Timeout: 5*time.Second,
-	}
-	resp, err := client.Get(url)
-	if err != nil {
-		results <- Result{URL: url, StatusCode: 0, Err: err}
-	}
-	defer resp.Body.Close()
-	results <-Result{URL: url, StatusCode: resp.StatusCode, Err: nil}
 }
