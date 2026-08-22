@@ -31,7 +31,7 @@ func threadID() {
 
 	fmt.Println("---- Locking Thread ----")
 
-	runtime.LockOSThread()
+	// runtime.LockOSThread()
 
 	for i := 0; i < 10; i++ {
 		tid := unix.Gettid()
