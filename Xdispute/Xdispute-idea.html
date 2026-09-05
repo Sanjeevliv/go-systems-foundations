@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XDispute — The AI Referee for Internet Arguments</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --brand-primary: #2563eb;
+            --brand-primary-light: #eff6ff;
+            --accent-emerald: #059669;
+            --accent-emerald-bg: #ecfdf5;
+            --accent-amber: #d97706;
+            --accent-amber-bg: #fffbeb;
+            --accent-rose: #dc2626;
+            --accent-rose-bg: #fef2f2;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text-primary);
+            background: var(--bg);
+            line-height: 1.65;
+            font-size: 15px;
+            padding: 0;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Simple Clean Nav */
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #0f172a;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+        }
+
+        .brand-name {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .nav-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 600;
+            background: var(--brand-primary-light);
+            color: var(--brand-primary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            background: #0f172a;
+            color: #ffffff;
+            transition: all 0.15s ease;
+        }
+
+        .btn:hover {
+            background: #1e293b;
+        }
+
+        /* Container */
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 40px 24px 80px 24px;
+        }
+
+        /* Header */
+        .doc-header {
+            margin-bottom: 36px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .doc-tag {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--brand-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 10px;
+        }
+
+        .doc-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.25;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .doc-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .meta-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--border);
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .meta-strip span strong {
+            color: var(--text-primary);
+        }
+
+        /* Sections */
+        .section {
+            margin-top: 48px;
+        }
+
+        h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            font-size: 15px;
+            line-height: 1.65;
+        }
+
+        /* Friendly Highlight Box */
+        .story-box {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--brand-primary);
+            border-radius: var(--radius-md);
+            padding: 22px;
+            margin: 20px 0 28px 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .story-box p {
+            margin-bottom: 10px;
+        }
+
+        .story-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 3-Pillar Highlight Grid */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 20px 0 28px 0;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0 28px 0;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin: 20px 0 28px 0;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-icon {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .card h4 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .card p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+            line-height: 1.5;
+        }
+
+        /* Mode Switcher Bar */
+        .mode-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .mode-picker-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .mode-pill-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 12.5px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .mode-pill-btn:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+
+        .mode-pill-btn.active {
+            background: #0f172a;
+            color: #ffffff;
+            border-color: #0f172a;
+        }
+
+        .mode-pill-btn.roast-pill.active {
+            background: linear-gradient(135deg, #b91c1c 0%, #ea580c 100%);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 2px 8px rgba(234, 88, 12, 0.35);
+        }
+
+        .mode-tag-pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .mode-tag-pill.prof {
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .mode-tag-pill.mod {
+            background: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .mode-tag-pill.strong {
+            background: rgba(239, 68, 68, 0.25);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(239, 68, 68, 0.4); }
+            50% { border-color: rgba(249, 115, 22, 0.8); }
+        }
+
+        /* Visual Verdict Card Mockup */
+        .verdict-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin: 24px 0;
+            box-shadow: var(--shadow-md);
+        }
+
+        .scorecard-graphic {
+            background: linear-gradient(145deg, #090d16 0%, #0f172a 100%);
+            border: 1px solid #1e293b;
+            border-radius: var(--radius-md);
+            padding: 24px;
+            color: #f8fafc;
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .card-brand {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            letter-spacing: 0.02em;
+            color: #ffffff;
+        }
+
+        .card-brand span {
+            color: #60a5fa;
+        }
+
+        .case-pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #94a3b8;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .versus-layout {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .contender {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+        }
+
+        .contender.winner {
+            border-color: rgba(16, 185, 129, 0.4);
+            background: rgba(16, 185, 129, 0.06);
+        }
+
+        .contender-title {
+            font-weight: 700;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .badge-win {
+            background: #065f46;
+            color: #6ee7b7;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .badge-loss {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .bar-bg {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+
+        .bar-fill-win {
+            height: 100%;
+            width: 85%;
+            background: #10b981;
+        }
+
+        .bar-fill-loss {
+            height: 100%;
+            width: 30%;
+            background: #ef4444;
+        }
+
+        .tags-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .tag-good {
+            font-size: 10px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .tag-bad {
+            font-size: 10px;
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .vs-text {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .verdict-box-summary {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            font-size: 12px;
+            color: #cbd5e1;
+            line-height: 1.5;
+            margin-bottom: 14px;
+            transition: all 0.3s ease;
+        }
+
+        /* Strong Mode / Savage Roast Card Overhauls */
+        .scorecard-graphic {
+            transition: all 0.35s ease;
+        }
+
+        .scorecard-graphic.roast-theme {
+            background: linear-gradient(145deg, #13060a 0%, #1c0a12 45%, #0f172a 100%);
+            border-color: rgba(239, 68, 68, 0.6);
+            box-shadow: 0 20px 40px -10px rgba(220, 38, 38, 0.35), 0 0 30px rgba(239, 68, 68, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .contender {
+            transition: all 0.3s ease;
+        }
+
+        .contender.winner-untouchable {
+            border-color: rgba(16, 185, 129, 0.65) !important;
+            background: rgba(16, 185, 129, 0.1) !important;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.2);
+        }
+
+        .contender.loser-roasted {
+            border-color: rgba(239, 68, 68, 0.75) !important;
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.14) 0%, rgba(127, 29, 29, 0.25) 100%) !important;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.25);
+            animation: roast-border-pulse 2.5s infinite ease-in-out;
+        }
+
+        @keyframes roast-border-pulse {
+            0%, 100% { border-color: rgba(239, 68, 68, 0.75); box-shadow: 0 0 15px rgba(239, 68, 68, 0.2); }
+            50% { border-color: rgba(249, 115, 22, 0.95); box-shadow: 0 0 25px rgba(249, 115, 22, 0.35); }
+        }
+
+        .badge-win.roast-badge-win {
+            background: #047857 !important;
+            color: #a7f3d0 !important;
+            border: 1px solid #10b981 !important;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+        }
+
+        .badge-loss.roast-badge-loss {
+            background: #991b1b !important;
+            color: #fee2e2 !important;
+            border: 1px solid #ef4444 !important;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.45);
+            animation: pulse-loss 1.5s infinite;
+        }
+
+        @keyframes pulse-loss {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.03); opacity: 0.85; }
+        }
+
+        .verdict-box-summary.roast-box {
+            background: linear-gradient(135deg, rgba(153, 27, 27, 0.35) 0%, rgba(69, 10, 10, 0.55) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.65);
+            box-shadow: 0 6px 25px rgba(220, 38, 38, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            padding: 18px 20px;
+            color: #fee2e2;
+        }
+
+        .roast-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(239, 68, 68, 0.35);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .roast-flame-tag {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 11.5px;
+            letter-spacing: 0.05em;
+            color: #ff6b6b;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .roast-flame-icon {
+            display: inline-block;
+            animation: flame-bounce 1.1s infinite alternate ease-in-out;
+        }
+
+        @keyframes flame-bounce {
+            0% { transform: scale(1) rotate(-3deg); }
+            100% { transform: scale(1.25) rotate(4deg); }
+        }
+
+        .roast-stat {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fee2e2;
+            background: rgba(220, 38, 38, 0.35);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(239, 68, 68, 0.45);
+        }
+
+        .roast-body {
+            font-size: 13px;
+            line-height: 1.65;
+            color: #fecaca;
+        }
+
+        .roast-body strong {
+            color: #ffffff;
+        }
+
+        .roast-punchline {
+            display: block;
+            margin-top: 14px;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.45);
+            border-left: 3px solid #ef4444;
+            border-radius: 4px;
+            font-size: 12.5px;
+            color: #fee2e2;
+            line-height: 1.6;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #94a3b8;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Process Steps */
+        .step-flow {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin: 20px 0 28px 0;
+        }
+
+        .step-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+
+        .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--brand-primary-light);
+            color: var(--brand-primary);
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .step-item h4 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .step-item p {
+            font-size: 12.5px;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+            line-height: 1.45;
+        }
+
+        /* Simple Money Breakdown */
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            margin: 18px 0 26px 0;
+            background: var(--surface);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        th {
+            background: #f8fafc;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        @media print {
+            .top-nav {
+                display: none;
+            }
+
+            body {
+                background: #ffffff;
+                font-size: 12px;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 0;
+            }
+
+            .btn {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid-3,
+            .grid-4,
+            .step-flow {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .versus-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .vs-text {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <div class="brand-logo-icon">XD</div>
+            <span class="brand-name">XDispute</span>
+            <span class="nav-pill">Project Overview</span>
+        </div>
+
+        <button class="btn" onclick="window.print()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            Print / Save as PDF
+        </button>
+    </nav>
+
+    <div class="container">
+
+        <!-- Header -->
+        <header class="doc-header">
+            <div class="doc-tag">Solo Project Concept</div>
+            <h1 class="doc-title">XDispute: The AI Referee for Internet Arguments</h1>
+            <p class="doc-subtitle">
+                A simple, fun tool that settles online debates with fast fact-checking and instant, shareable scorecards.
+            </p>
+
+            <div class="meta-strip">
+                <span>What is it? <strong>AI Debate Referee</strong></span>
+                <span>•</span>
+                <span>Who uses it? <strong>People arguing on Twitter, Reddit & WhatsApp</strong></span>
+                <span>•</span>
+                <span>Build Type: <strong>Solo Weekend Project</strong></span>
+            </div>
+        </header>
+
+        <!-- 01: The Simple Idea -->
+        <section class="section" style="margin-top: 24px;">
+            <h2>The Problem Everyone Has Seen</h2>
+            <div class="story-box">
+                <p>
+                    We’ve all seen it: two people arguing endlessly in Twitter replies, Reddit comments, or WhatsApp groups. They argue about movie box office numbers, sports referee calls, or phone specs.
+                </p>
+                <p>
+                    Nobody ever concedes. They start throwing personal insults, changing the subject, or making up numbers. Why? Because <strong>there is no neutral referee in the room</strong> to say who is actually right.
+                </p>
+                <p style="font-weight: 600; color: var(--text-primary); margin-top: 14px;">
+                    Enter XDispute: You tag the bot or upload a screenshot, and within 2 seconds an AI referee reads both sides, fact-checks the claims, and produces a neat, official-looking Verdict Card.
+                </p>
+            </div>
+        </section>
+
+        <!-- 02: The Product Preview -->
+        <section class="section">
+            <h2>What Users Actually See & Share</h2>
+            <p>
+                When someone wants to end an argument, they generate this card and post the picture directly into the debate. Try toggling the execution mode below to see how the tone and roast level change:
+            </p>
+
+            <div class="verdict-box">
+                <!-- Mode Selector -->
+                <div class="mode-picker">
+                    <span class="mode-picker-label">Select Execution Mode:</span>
+                    <button class="mode-pill-btn" id="btn-mode-prof" onclick="switchExecutionMode('professional')">
+                        👔 Professional
+                    </button>
+                    <button class="mode-pill-btn active" id="btn-mode-mod" onclick="switchExecutionMode('moderate')">
+                        ⚖️ Moderate (Default)
+                    </button>
+                    <button class="mode-pill-btn roast-pill" id="btn-mode-strong" onclick="switchExecutionMode('strong')">
+                        🔥 Strong (Savage Roast)
+                    </button>
+                </div>
+
+                <div class="scorecard-graphic" id="scorecard-element">
+                    <div class="card-header-bar">
+                        <div class="card-brand"><span>⚖️ XDISPUTE</span> VERDICT CARD</div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="mode-tag-pill mod" id="card-mode-badge">MODE: MODERATE</span>
+                            <div class="case-pill">CASE #XD-8492 • VERIFIED</div>
+                        </div>
+                    </div>
+
+                    <div class="versus-layout">
+                        <!-- Person A -->
+                        <div class="contender winner" id="winner-contender-box">
+                            <div class="contender-title">
+                                <span>@cinema_insider</span>
+                                <span class="badge-win" id="winner-badge">WINNER (85%)</span>
+                            </div>
+                            <div class="bar-bg">
+                                <div class="bar-fill-win" id="winner-bar" style="width: 85%;"></div>
+                            </div>
+                            <div class="tags-row" id="winner-tags">
+                                <span class="tag-good">✓ Official Source Quoted</span>
+                                <span class="tag-good">✓ Stayed on Topic</span>
+                            </div>
+                        </div>
+
+                        <div class="vs-text">VS</div>
+
+                        <!-- Person B -->
+                        <div class="contender" id="loser-contender-box">
+                            <div class="contender-title">
+                                <span>@random_critic</span>
+                                <span class="badge-loss" id="loser-badge">REFUTED (30%)</span>
+                            </div>
+                            <div class="bar-bg">
+                                <div class="bar-fill-loss" id="loser-bar" style="width: 30%;"></div>
+                            </div>
+                            <div class="tags-row" id="loser-tags">
+                                <span class="tag-bad">⚠ Personal Insult Used</span>
+                                <span class="tag-bad">⚠ Outdated Numbers</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="verdict-box-summary" id="verdict-summary-box">
+                        <strong>Referee Summary:</strong> @cinema_insider is correct regarding the second-weekend box office numbers based on distributor reports. @random_critic used unadjusted ticket sales and resorted to name-calling.
+                    </div>
+
+                    <div class="card-bottom">
+                        <span>xdispute.io/case/8492</span>
+                        <span style="color: #60a5fa;" id="footer-settled-label">Settled by XDispute AI</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Three Execution Modes Explained -->
+        <section class="section">
+            <h2>Three Referee Personalities: From Polite to Savage</h2>
+            <p>
+                Debates have different vibes. A technical disagreement on LinkedIn needs a different tone than a fiery sports argument on Twitter. Users can pick from 3 referee modes:
+            </p>
+
+            <div class="grid-3">
+                <div class="card" style="border-top: 3px solid #3b82f6;">
+                    <div class="card-icon">👔</div>
+                    <h4>1. Professional Mode</h4>
+                    <p><strong>Clean, formal, and strictly objective.</strong> Uses academic framing, highlights verified citations, and avoids all sarcasm. Perfect for workplace Slack/Teams channels, LinkedIn, and technical disagreements.</p>
+                </div>
+
+                <div class="card" style="border-top: 3px solid #10b981;">
+                    <div class="card-icon">⚖️</div>
+                    <h4>2. Moderate Mode (Default)</h4>
+                    <p><strong>Balanced, conversational, and fair.</strong> Explains who won in simple everyday terms, points out logical fallacies without being insulting, and delivers a quick, friendly resolution for general debates.</p>
+                </div>
+
+                <div class="card" style="border-top: 3px solid #ef4444; background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%);">
+                    <div class="card-icon">🔥</div>
+                    <h4 style="color: #ea580c;">3. Strong Mode (Savage Roast 🔥)</h4>
+                    <p><strong>Brutally honest, hilarious, and completely merciless.</strong> Beyond scoring the facts, the AI unleashes an unhinged, personalized roast dissecting the loser's weak excuses, fake receipts, and timeline meltdown. Built for maximum viral laughter on Twitter and group chats where someone needs to get cooked!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 03: Why It Spreads So Fast -->
+        <section class="section">
+            <h2>Why People Will Actually Use This</h2>
+            <div class="grid-3">
+                <div class="card">
+                    <div class="card-icon">🏆</div>
+                    <h4>People Love Winning</h4>
+                    <p>When someone is arguing online, they want proof that they won. The scorecard gives them bragging rights they can't wait to share.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">📸</div>
+                    <h4>Images Beat Links</h4>
+                    <p>Instead of posting a link that nobody clicks, users paste the image directly. People scrolling their feed stop and read pictures.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">👀</div>
+                    <h4>Natural Curiosity</h4>
+                    <p>Everyone reading the fight sees the card with the website name on it. Many of them will try it on their own arguments.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 04: Real-World Topics -->
+        <section class="section">
+            <h2>Where People Argue the Most</h2>
+            <div class="grid-4">
+                <div class="card">
+                    <div class="card-icon">🍿</div>
+                    <h4>Movie Debates</h4>
+                    <p>"Is this movie a hit or flop?", box office records, and Rotten Tomatoes scores.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">⚽</div>
+                    <h4>Sports Debates</h4>
+                    <p>Controversial referee calls, penalty claims, and player performance arguments.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">📱</div>
+                    <h4>Gadgets & Tech</h4>
+                    <p>iPhone vs. Android camera wars, battery life claims, and benchmark fights.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">💬</div>
+                    <h4>Friends Group Chats</h4>
+                    <p>Settling silly everyday disagreements on WhatsApp or Discord with a fun referee.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 05: How It Judges -->
+        <section class="section">
+            <h2>How the AI Judges Who Won</h2>
+            <p>
+                The AI follows 3 simple, fair rules so nobody can complain about favoritism:
+            </p>
+
+            <div class="grid-3">
+                <div class="card">
+                    <div class="card-icon">🔍</div>
+                    <h4>1. Real Facts First</h4>
+                    <p>Did you cite real facts and dates, or did you just make things up? Genuine evidence earns the most points.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🧠</div>
+                    <h4>2. Does It Make Sense?</h4>
+                    <p>Did you actually answer their point, or did you dodge the question and try to change the topic?</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🚫</div>
+                    <h4>3. No Personal Insults</h4>
+                    <p>If you start calling the other person names instead of debating the topic, you immediately lose points.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 06: How It Makes Money -->
+        <section class="section">
+            <h2>How It Can Make a Little Money on the Side</h2>
+            <p>
+                Because this runs on lightweight serverless code, the costs to run it are tiny (around $10 to $20/month). Here’s how it can bring in simple, automated income:
+            </p>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Way to Earn</th>
+                            <th>How It Works</th>
+                            <th>What People Pay</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Small Sponsor Logo</strong></td>
+                            <td>A brand (like a sports app or gaming community) puts a tiny sponsor logo at the bottom of viral cards.</td>
+                            <td>$200 – $400 / month flat</td>
+                        </tr>
+                        <tr>
+                            <td><strong>"Appeal" Rematch Fee</strong></td>
+                            <td>If someone lost an argument and wants a second-round review with new evidence, they pay a tiny fee.</td>
+                            <td>₹49 (UPI) or $1.99</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Discord & Group Chat Bot</strong></td>
+                            <td>Gaming servers and group chats pay a small monthly fee to keep the AI referee active in their chat.</td>
+                            <td>$5 – $15 / month per server</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 07: How to Build It -->
+        <section class="section">
+            <h2>The Simple 3-Step Build Plan</h2>
+            <div class="step-flow">
+                <div class="step-item">
+                    <div class="step-num">1</div>
+                    <h4>Website</h4>
+                    <p>A dead-simple web page where you drop a screenshot and get the Verdict Card in 2 seconds.</p>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-num">2</div>
+                    <h4>Twitter / Telegram Bot</h4>
+                    <p>Allow users to mention <code>@XDispute</code> directly in an argument thread to auto-reply with the card.</p>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-num">3</div>
+                    <h4>Seed on Trending Topics</h4>
+                    <p>Reply with cards under a few high-profile movie or sports fights to spark initial curiosity.</p>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-num">4</div>
+                    <h4>Put on Autopilot</h4>
+                    <p>Once people start using it, it runs itself without needing daily maintenance.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div><strong>XDispute</strong> • Simple Solo Project Idea</div>
+            <div>Fun, Automated & Easy to Share</div>
+        </footer>
+
+    </div>
+
+    <!-- Script for Dynamic Execution Mode Switching -->
+    <script>
+        const modeData = {
+            professional: {
+                badgeText: "MODE: PROFESSIONAL (OBJECTIVE AUDIT)",
+                badgeClass: "mode-tag-pill prof",
+                cardClass: "scorecard-graphic",
+                winnerBoxClass: "contender winner",
+                loserBoxClass: "contender",
+                winnerBadgeText: "SUBSTANTIATED (82%)",
+                winnerBadgeClass: "badge-win",
+                loserBadgeText: "UNSUBSTANTIATED (35%)",
+                loserBadgeClass: "badge-loss",
+                winnerBarWidth: "82%",
+                loserBarWidth: "35%",
+                winnerTags: `
+                    <span class="tag-good">✓ Audited Distributor Filing</span>
+                    <span class="tag-good">✓ Chronological Consistency</span>
+                    <span class="tag-good">✓ Verified Empirical Math</span>
+                `,
+                loserTags: `
+                    <span class="tag-bad">⚠ Unadjusted Nominal Metric</span>
+                    <span class="tag-bad">⚠ Fallacy: Ad Hominem</span>
+                    <span class="tag-bad">⚠ Non-Sequitur Deflection</span>
+                `,
+                summaryClass: "verdict-box-summary",
+                summary: `<strong>Academic Evaluation:</strong> Contender @cinema_insider's assertion regarding domestic second-weekend box office retention is substantiated by SEC-compliant distributor filings and verified theatrical grosses. Conversely, @random_critic relied on unadjusted historical gross metrics without accounting for ticket inflation, subsequently exhibiting ad hominem deflection rather than addressing empirical evidence.`,
+                footer: `Settled Impartially by XDispute AI • Verified Audit Log`
+            },
+            moderate: {
+                badgeText: "MODE: MODERATE (DEFAULT)",
+                badgeClass: "mode-tag-pill mod",
+                cardClass: "scorecard-graphic",
+                winnerBoxClass: "contender winner",
+                loserBoxClass: "contender",
+                winnerBadgeText: "WINNER (85%)",
+                winnerBadgeClass: "badge-win",
+                loserBadgeText: "REFUTED (30%)",
+                loserBadgeClass: "badge-loss",
+                winnerBarWidth: "85%",
+                loserBarWidth: "30%",
+                winnerTags: `
+                    <span class="tag-good">✓ Official Source Quoted</span>
+                    <span class="tag-good">✓ Stayed on Topic</span>
+                    <span class="tag-good">✓ Accurate Timeline</span>
+                `,
+                loserTags: `
+                    <span class="tag-bad">⚠ Personal Insult Used</span>
+                    <span class="tag-bad">⚠ Outdated Numbers (2012)</span>
+                    <span class="tag-bad">⚠ Goalpost Shifting</span>
+                `,
+                summaryClass: "verdict-box-summary",
+                summary: `<strong>Referee Summary:</strong> @cinema_insider takes this round cleanly by quoting verified theatrical tracking numbers. @random_critic relied on outdated 2012 blog posts, ignored the actual timeline, and resorted to name-calling when challenged. Clean call for @cinema_insider.`,
+                footer: `Settled by XDispute AI`
+            },
+            strong: {
+                badgeText: "🔥 MODE: STRONG (SAVAGE ROAST ACTIVE)",
+                badgeClass: "mode-tag-pill strong",
+                cardClass: "scorecard-graphic roast-theme",
+                winnerBoxClass: "contender winner winner-untouchable",
+                loserBoxClass: "contender loser-roasted",
+                winnerBadgeText: "👑 TOTAL ANNIHILATION (96%)",
+                winnerBadgeClass: "badge-win roast-badge-win",
+                loserBadgeText: "💀 COOKED & RATIO'D (4%)",
+                loserBadgeClass: "badge-loss roast-badge-loss",
+                winnerBarWidth: "96%",
+                loserBarWidth: "4%",
+                winnerTags: `
+                    <span class="tag-good">👑 Flawless Dissection</span>
+                    <span class="tag-good">🧾 Ironclad Receipts</span>
+                    <span class="tag-good">🛡️ Zero Damage Taken</span>
+                `,
+                loserTags: `
+                    <span class="tag-bad">💀 100% Grade-A Copium</span>
+                    <span class="tag-bad">🤡 Unarmed at Battle of Wits</span>
+                    <span class="tag-bad">📉 Generational L & Ratio</span>
+                    <span class="tag-bad">🚑 Needs Emergency Burn Unit</span>
+                `,
+                summaryClass: "verdict-box-summary roast-box",
+                summary: `
+                    <div class="roast-header">
+                        <span class="roast-flame-tag"><span class="roast-flame-icon">🔥</span> LEVEL 3 CASUALTY REPORT • ROAST PROTOCOL ACTIVATED</span>
+                        <span class="roast-stat">DAMAGE: TERMINAL (96% vs 4%)</span>
+                    </div>
+                    <div class="roast-body">
+                        <strong>@cinema_insider didn't just win this argument; they performed an unanesthetized surgical autopsy live on your timeline.</strong> They pulled up official SEC distributor filings, dated ticket batches, and verified math.
+                        <br><br>
+                        Meanwhile, <strong>@random_critic</strong> arrived at a battle of wits completely unarmed, desperately swinging 12-year-old unadjusted blog screenshots like a blindfolded toddler with a plastic spatula. When their fake claims got vaporized in 4 seconds flat, they threw an Olympic-level toddler tantrum—spamming clown emojis, moving goalposts to another solar system, and hurling middle-school insults while gasping for oxygen in the quote-tweets.
+                        <div class="roast-punchline">
+                            💀 <strong>OFFICIAL AI DISPATCH:</strong> This isn't just an L—it's a generational ratio with permanent collateral damage. Delete the tweet, power down the router, bury the smartphone in wet cement, and go touch grass immediately. You got absolutely incinerated, @random_critic.
+                        </div>
+                    </div>
+                `,
+                footer: `🔥 Savage Roast Executed by XDispute AI • Zero Survivors`
+            }
+        };
+
+        function switchExecutionMode(mode) {
+            // Update button states
+            document.querySelectorAll('.mode-pill-btn').forEach(btn => btn.classList.remove('active'));
+            if (mode === 'professional') {
+                document.getElementById('btn-mode-prof').classList.add('active');
+            } else if (mode === 'moderate') {
+                document.getElementById('btn-mode-mod').classList.add('active');
+            } else if (mode === 'strong') {
+                document.getElementById('btn-mode-strong').classList.add('active');
+            }
+
+            // Update card elements with data
+            const data = modeData[mode];
+            const badge = document.getElementById('card-mode-badge');
+            badge.textContent = data.badgeText;
+            badge.className = data.badgeClass;
+
+            // Card theme & contender styling
+            document.getElementById('scorecard-element').className = data.cardClass;
+            document.getElementById('winner-contender-box').className = data.winnerBoxClass;
+            document.getElementById('loser-contender-box').className = data.loserBoxClass;
+
+            // Badges & bars
+            const winBadge = document.getElementById('winner-badge');
+            winBadge.textContent = data.winnerBadgeText;
+            winBadge.className = data.winnerBadgeClass;
+
+            const loseBadge = document.getElementById('loser-badge');
+            loseBadge.textContent = data.loserBadgeText;
+            loseBadge.className = data.loserBadgeClass;
+
+            document.getElementById('winner-bar').style.width = data.winnerBarWidth;
+            document.getElementById('loser-bar').style.width = data.loserBarWidth;
+
+            // Tags & summary
+            document.getElementById('winner-tags').innerHTML = data.winnerTags;
+            document.getElementById('loser-tags').innerHTML = data.loserTags;
+            
+            const summaryBox = document.getElementById('verdict-summary-box');
+            summaryBox.className = data.summaryClass;
+            summaryBox.innerHTML = data.summary;
+
+            document.getElementById('footer-settled-label').textContent = data.footer;
+        }
+    </script>
+</body>
+
+</html>
